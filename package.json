@@ -1,0 +1,19 @@
+{
+  "name": "simple-oauth",
+  "module": "index.ts",
+  "type": "module",
+  "exports": {
+".": "./index.ts",
+"./types": "./lib/types.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@oslojs/crypto": "^1.0.1",
+    "@oslojs/encoding": "^1.1.0"
+  }
+}

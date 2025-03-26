@@ -1,8 +1,6 @@
 import extractCookie from "./utils/extractCookies";
 import type { OAuth2Client } from "./OAuth2Client";
 import { SimpleAuthError, type SimpleAuthResponse } from "./types";
-import generateState from "./utils/generateState";
-import createCookie from "./utils/createCookie";
 import type { Provider } from "./Provider";
 
 
@@ -10,17 +8,19 @@ import type { Provider } from "./Provider";
  * SimpleAuth Class
  * This class orchestrates the authentication process using multiple providers.
  *
- * @template P - A record type where each key corresponds to a provider configuration.
- * The value for each key is an object that contains a 'provider' property which is an instance of a Provider.
+ * @template P - A record type where each key is the providers name.
+ * The value for each key is then an instance of a Provider Class
+ * 
  */
-export class SimpleAuth<P extends Record<string, { provider: Provider<any> }>> {
+export class SimpleAuth<P extends Record<string, Provider<any>>> {
     private providers: P;
+    // TODO: Change this to use the actual SimpleAuthResponse type somehow if possible
     private onSuccess: (data: {
         [K in keyof P]: {
             // The provider's name (as a string, if K is a string).
             provider: K extends string ? K : never;
             // The data returned from the provider, with type information from the provider's returnType.
-            providerData: P[K]['provider']['returnType'];
+            providerData: P[K]['returnType'];
         }
     }[keyof P]) => Response;
 
@@ -33,7 +33,7 @@ export class SimpleAuth<P extends Record<string, { provider: Provider<any> }>> {
     constructor(providers: P, onSuccess: (data: {
         [K in keyof P]: {
             provider: K extends string ? K : never;
-            providerData: P[K]['provider']['returnType'];
+            providerData: P[K]['returnType'];
         }
     }[keyof P]) => Response) {
         this.providers = providers;
@@ -49,26 +49,6 @@ export class SimpleAuth<P extends Record<string, { provider: Provider<any> }>> {
      * @param provider - The OAuth2 client associated with the provider.
      * @returns A Response object with a 302 status (redirection) and the appropriate headers.
      */
-    private createAuthRedirect(url: URL, state: string, provider: OAuth2Client) {
-        const headers = new Headers();
-        const isSecure = url.protocol === 'https:';
-
-
-        // First, create each cookie string
-        const savedCookie = createCookie('simple_oauth_cookie', state + "+" + provider.clientName, isSecure);
-        // const providerCookie = this.createCookie('oauth_provider_saved', provider.clientName, isSecure);
-
-        // Use separate append calls for each cookie
-        headers.append("Set-Cookie", savedCookie);;
-
-        headers.set("Content-Type", "text/html");
-        headers.set("Location", url.toString());
-
-        return new Response(null, {
-            status: 302,
-            headers
-        });
-    }
 
     /**
         * Handles the signup (authentication initiation) request.
@@ -92,7 +72,7 @@ export class SimpleAuth<P extends Record<string, { provider: Provider<any> }>> {
         /*if (!this.providers.some(client => client.name === provider.trim().toLowerCase()))
             throw new SimpleAuthError(`Provider '${provider}' not found or not configured`, 404);
 */
-        const client = this.providers[provider]['provider'];
+        const client = this.providers[provider];
         //const client = this.providers.find((client) => client.name === provider)
         return client!.HandleSignup()
         /*const state = generateState();
@@ -124,7 +104,7 @@ export class SimpleAuth<P extends Record<string, { provider: Provider<any> }>> {
         /*if (!this.providers.some(client => client.name === provider.trim().toLowerCase()))
             throw new SimpleAuthError(`Provider '${provider}' not found or not configured`, 404);
 */
-        const provider = this.providers[storedProvider]['provider'];
+        const provider = this.providers[storedProvider];
         //const provider = this.providers.find(client => client.name === storedProvider)
         if (!provider)
             throw new SimpleAuthError(`Provider '${storedProvider}' not configured`, 404);
@@ -138,7 +118,7 @@ export class SimpleAuth<P extends Record<string, { provider: Provider<any> }>> {
         } as {
             [K in keyof P]: {
                 provider: K extends string ? K : never;
-                providerData: P[K]['provider']['returnType'];
+                providerData: P[K]['returnType'];
             }
         }[keyof P])
 

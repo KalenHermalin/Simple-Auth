@@ -1,5 +1,4 @@
-import type { Type } from "typescript";
-import { SimpleAuthProviderError, type SimpleAuthResponse } from "./types";
+import { type SimpleAuthResponse } from "./types";
 
 
 

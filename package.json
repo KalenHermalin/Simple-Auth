@@ -1,17 +1,26 @@
 {
-  "name": "simple-oauth",
-  "module": "index.ts",
+  "name": "simple-auth",
+  "license": "MIT",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
   "type": "module",
+  "repository": {
+    "url": "https://github.com/KalenHermalin/Simple-Auth"
+  },
   "exports": {
-    ".": "./index.ts",
+    ".": "./lib/index.ts",
     "./types": "./lib/types.ts",
     "./providers": "./lib/providers/index.ts"
   },
-  "devDependencies": {
-    "@types/bun": "latest"
+  "scripts": {
+    "build": "tsup",
+    "lint": "tsc"
   },
-  "peerDependencies": {
-    "typescript": "^5"
+  "devDependencies": {
+    "typescript": "^5",
+    "tsup": "^8.4.0"
   },
   "dependencies": {
     "@oslojs/encoding": "^1.1.0",

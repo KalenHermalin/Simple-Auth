@@ -1,0 +1,8 @@
+/lib
+/node_modules
+
+.env
+
+index.ts
+tsconfig.json
+tsup.config.ts

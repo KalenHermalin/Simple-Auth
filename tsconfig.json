@@ -4,7 +4,7 @@
     "noImplicitAny": true,
     "esModuleInterop": true,
     "strictNullChecks": true,
-    "target": "ESNext",
+    "target": "ES2022",
     "moduleResolution": "node",
     "module": "CommonJS",
     "declaration": true,
@@ -12,7 +12,7 @@
     "noEmit": true,
     "outDir": "dist",
     "skipLibCheck": true,
-    "lib": ["ESNext", "DOM"]
+    "lib": ["ESNext","ES2022", "DOM"]
     },
     
     "include": ["lib"],

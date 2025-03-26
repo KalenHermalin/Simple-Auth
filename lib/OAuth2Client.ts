@@ -1,5 +1,5 @@
 import extractCookie from "./utils/extractCookies";
-import { SimpleAuthError, type OAuthResponse } from "./types";
+import { SimpleAuthError, type SimpleAuthResponse } from "./types";
 import createCookie from "./utils/createCookie";
 
 export interface OAuth2ClientProps {
@@ -21,6 +21,7 @@ export interface OAuth2ClientProps {
 
 export abstract class OAuth2Client {
     clientId: string;
+    clientName: string;
     endpoints: {
         authorizationEndpoint: string;
         tokenEndpoint: string;
@@ -28,17 +29,16 @@ export abstract class OAuth2Client {
 
     }
     clientSecret: string;
-    clientName: string;
     options?: {
         redirectURI?: string;
         scopes?: string[];
 
     }
 
-    constructor(props: OAuth2ClientProps) {
+    constructor(name: string, props: OAuth2ClientProps) {
+        this.clientName = name.toLowerCase();
         this.clientId = props.clientId;
         this.clientSecret = props.clientSecret;
-        this.clientName = props.clientName.toLowerCase();
         this.endpoints = props.endpoints
         this.options = props.options
     }
@@ -102,7 +102,7 @@ export abstract class OAuth2Client {
         const result = await response.json();
         if ("error" in result) {
             // invalid credentials, code, redirect uri
-            throw new SimpleAuthError(`PRovider returned ${result.error}`, 401)
+            throw new SimpleAuthError(`Provider returned ${result.error}`, 401)
         }
         return result;
 
@@ -114,8 +114,7 @@ export abstract class OAuth2Client {
 
 
         // First, create each cookie string
-        const savedCookie = createCookie('simple_oauth_cookie', state + "+" + this.clientId, isSecure);
-        // const providerCookie = this.createCookie('oauth_provider_saved', provider.clientName, isSecure);
+        const savedCookie = createCookie('simple_oauth_cookie', state + "+" + this.clientName, isSecure);
 
         // Use separate append calls for each cookie
         headers.append("Set-Cookie", savedCookie);;
@@ -129,6 +128,6 @@ export abstract class OAuth2Client {
         });
     }
 
-    public abstract getUserData(validatedResult: any): Promise<OAuthResponse>
+    public abstract getUserData<T>(validatedResult: any): Promise<T>
 
 }

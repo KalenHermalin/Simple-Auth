@@ -1,26 +1,61 @@
 import extractCookie from "./utils/extractCookies";
 import type { OAuth2Client } from "./OAuth2Client";
-import { SimpleAuthError, type OAuthResponse } from "./types";
+import { SimpleAuthError, type SimpleAuthResponse } from "./types";
 import generateState from "./utils/generateState";
+import createCookie from "./utils/createCookie";
+import type { Provider } from "./Provider";
 
-export class SimpleAuth {
-    private providers: OAuth2Client[];
-    private onSuccess: (data: OAuthResponse) => Response;
 
-    constructor(providers: OAuth2Client[], onSuccess: (data: OAuthResponse) => Response) {
+/**
+ * SimpleAuth Class
+ * This class orchestrates the authentication process using multiple providers.
+ *
+ * @template P - A record type where each key corresponds to a provider configuration.
+ * The value for each key is an object that contains a 'provider' property which is an instance of a Provider.
+ */
+export class SimpleAuth<P extends Record<string, { provider: Provider<any> }>> {
+    private providers: P;
+    private onSuccess: (data: {
+        [K in keyof P]: {
+            // The provider's name (as a string, if K is a string).
+            provider: K extends string ? K : never;
+            // The data returned from the provider, with type information from the provider's returnType.
+            providerData: P[K]['provider']['returnType'];
+        }
+    }[keyof P]) => Response;
+
+    /**
+    * Constructs a new instance of SimpleAuth.
+    *
+    * @param providers - An object mapping provider names to their configuration (including the Provider instance).
+    * @param onSuccess - A callback that processes user data and returns a Response.
+    */
+    constructor(providers: P, onSuccess: (data: {
+        [K in keyof P]: {
+            provider: K extends string ? K : never;
+            providerData: P[K]['provider']['returnType'];
+        }
+    }[keyof P]) => Response) {
         this.providers = providers;
         this.onSuccess = onSuccess;
     }
 
-
-
+    /**
+     * Creates an HTTP redirection Response for the OAuth flow.
+     * This method sets the necessary headers including cookies to preserve session state.
+     *
+     * @param url - The URL to which the user should be redirected.
+     * @param state - A state string used for CSRF protection and session correlation.
+     * @param provider - The OAuth2 client associated with the provider.
+     * @returns A Response object with a 302 status (redirection) and the appropriate headers.
+     */
     private createAuthRedirect(url: URL, state: string, provider: OAuth2Client) {
         const headers = new Headers();
         const isSecure = url.protocol === 'https:';
 
 
         // First, create each cookie string
-        const savedCookie = this.createCookie('simple_oauth_cookie', state + "+" + provider.clientName, isSecure);
+        const savedCookie = createCookie('simple_oauth_cookie', state + "+" + provider.clientName, isSecure);
         // const providerCookie = this.createCookie('oauth_provider_saved', provider.clientName, isSecure);
 
         // Use separate append calls for each cookie
@@ -35,21 +70,45 @@ export class SimpleAuth {
         });
     }
 
+    /**
+        * Handles the signup (authentication initiation) request.
+        * This method extracts the provider from the query string, validates it,
+        * and then delegates the signup handling to the specified provider.
+        *
+        * @param req - The HTTP Request object initiating the signup.
+        * @returns A Response object returned by the provider's HandleSignup method.
+        * @throws SimpleAuthError if the provider parameter is missing or invalid.
+        */
     public userSignUpHandler(req: Request): Response {
         console.log("SimpleAuth: Inside Signup Handler")
         const { searchParams } = new URL(req.url)
         const provider = searchParams.get("provider")?.toLowerCase()
         if (!provider)
             throw new SimpleAuthError("Provider parameter missing", 400)
-        if (!this.providers.some(oauthClient => oauthClient.clientName === provider.trim().toLowerCase()))
+        if (!(provider in this.providers)) {
             throw new SimpleAuthError(`Provider '${provider}' not found or not configured`, 404);
 
-        const AuthClient = this.providers.find((client) => client.clientName === provider)
-        const state = generateState();
+        }
+        /*if (!this.providers.some(client => client.name === provider.trim().toLowerCase()))
+            throw new SimpleAuthError(`Provider '${provider}' not found or not configured`, 404);
+*/
+        const client = this.providers[provider]['provider'];
+        //const client = this.providers.find((client) => client.name === provider)
+        return client!.HandleSignup()
+        /*const state = generateState();
         const url: URL = AuthClient!.createAuthorizationURL(state)
-        return this.createAuthRedirect(url, state, AuthClient!)
+        return this.createAuthRedirect(url, state, AuthClient!)*/
     }
 
+    /**
+    * Handles the callback after the user has authenticated with the provider.
+    * It validates the session cookie, determines the appropriate provider,
+    * and then processes the callback via the provider's HandleCallback method.
+    *
+    * @param req - The HTTP Request object containing callback parameters.
+    * @returns A Promise that resolves to a Response produced by the onSuccess callback.
+    * @throws SimpleAuthError if required cookies or provider information are missing or invalid.
+    */
     public async userSignUpCallback(req: Request): Promise<Response> {
         const simple_oauth_cookie = extractCookie(req.headers.get("cookie") || "", "simple_oauth_cookie")?.split("+")
         if (!simple_oauth_cookie)
@@ -57,14 +116,31 @@ export class SimpleAuth {
         const storedProvider = simple_oauth_cookie[1]
         if (!storedProvider)
             throw new SimpleAuthError("Missing information from session cookie", 400);
-        const provider = this.providers.find(oauthClient => oauthClient.clientName === storedProvider)
+
+        if (!(storedProvider in this.providers)) {
+            throw new SimpleAuthError(`Provider '${storedProvider}' not found or not configured`, 404);
+
+        }
+        /*if (!this.providers.some(client => client.name === provider.trim().toLowerCase()))
+            throw new SimpleAuthError(`Provider '${provider}' not found or not configured`, 404);
+*/
+        const provider = this.providers[storedProvider]['provider'];
+        //const provider = this.providers.find(client => client.name === storedProvider)
         if (!provider)
             throw new SimpleAuthError(`Provider '${storedProvider}' not configured`, 404);
-        const result = await provider!.validateAuthCodes(req)
+
+        const userData = await provider.HandleCallback(req)
 
         /// PROCESS USER DATA 
-        const userData = await provider!.getUserData(result);
-        return this.onSuccess(userData)
+        return this.onSuccess({
+            provider: storedProvider as keyof P & string,
+            providerData: userData.providerData
+        } as {
+            [K in keyof P]: {
+                provider: K extends string ? K : never;
+                providerData: P[K]['provider']['returnType'];
+            }
+        }[keyof P])
 
     }
 

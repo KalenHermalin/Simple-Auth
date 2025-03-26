@@ -6,7 +6,7 @@
     "strictNullChecks": true,
     "target": "ESNext",
     "moduleResolution": "node",
-    "module": "CommonJS",
+    "module": "ESNext",
     "declaration": true,
     "isolatedModules": true,
     "noEmit": true,

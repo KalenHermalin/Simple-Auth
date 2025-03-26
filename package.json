@@ -18,8 +18,9 @@
     "lint": "tsc"
   },
   "devDependencies": {
-    "typescript": "^5",
-    "tsup": "^8.4.0"
+    "@types/node": "^22.13.13",
+    "tsup": "^8.4.0",
+    "typescript": "^5"
   },
   "dependencies": {
     "@oslojs/encoding": "^1.1.0",

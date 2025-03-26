@@ -12,7 +12,7 @@
     "noEmit": true,
     "outDir": "dist",
     "skipLibCheck": true,
-    "lib": ["ESNext", "ES2022"]
+    "lib": ["ESNext"]
     },
     
     "include": ["lib"],

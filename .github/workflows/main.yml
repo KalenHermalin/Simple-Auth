@@ -1,10 +1,20 @@
 name: CI
 on: 
     push:
-        branches:
-            - "**"
+        branches: [main]
+    pull_request:
+        branches: [main]
 
 jobs:
+    lint:
+        runs-on: ubuntu-latest
+        steps:
+          - uses: actions/checkout@v4
+          - uses: oven-sh/setup-bun@v2
+            with:
+                bun-version: latest
+          - run: bun install --frozen-lockfile
+          - run: bun run lint
     build:
         runs-on: ubuntu-latest
         steps:
@@ -13,4 +23,4 @@ jobs:
               with:
                  bun-version: latest
             - run: bun install --frozen-lockfile
-            - run: bun run lint && bun run build
+            - run: bun run build

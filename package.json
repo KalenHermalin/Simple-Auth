@@ -1,5 +1,5 @@
 {
-  "name": "simple-auth",
+  "name": "@kalenhermalin/simple-auth",
   "license": "MIT",
   "version": "0.0.1",
   "main": "dist/index.js",

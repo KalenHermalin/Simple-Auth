@@ -14,11 +14,8 @@
     "url": "git+https://github.com/KalenHermalin/Simple-Auth.git"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "@kalenhermalin:registry": "https://npm.pkg.github.com"
   },
-  "publishConfig": {
-  "@kalenhermalin:registry": "https://npm.pkg.github.com"
-},
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

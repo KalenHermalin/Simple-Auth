@@ -11,11 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v4
         with:
-          bun-version: latest
-      - run: bun install
-      - run: bun run build
+          node-version: '18'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@KalenHermalin'
+      - run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: npm run lint
+      - run: npm run build
 
   publish-gpr:
     needs: build
@@ -25,10 +30,13 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v4
         with:
-          bun-version: latest
-      - run: bun install
-      - run: bun publish
+          node-version: '18'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@KalenHermalin'
+            # Use npm instead of bun
+      - run: npm ci
         env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: npm publish

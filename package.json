@@ -9,7 +9,7 @@
     "url": "https://github.com/KalenHermalin/Simple-Auth"
   },
   "publishConfig": {
-  "@YOUR-USERNAME:registry": "https://npm.pkg.github.com"
+  "@kalenhermalin:registry": "https://npm.pkg.github.com"
 },
   "exports": {
     ".": "./lib/index.ts",

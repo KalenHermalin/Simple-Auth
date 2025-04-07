@@ -9,14 +9,13 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["ESNext","ES2022", "DOM"],
+    "lib": ["ESNext", "ES2022", "DOM"],
     "moduleResolution": "node",
     "noImplicitAny": true,
     "strictNullChecks": true,
     "isolatedModules": true,
-    "noEmit": true,
-    },
-    
-    "include": ["lib"],
-    "exclude": ["node_modules"]
+    "noEmit": true
+  },
+  "include": ["lib"],
+  "exclude": ["node_modules"]
 }

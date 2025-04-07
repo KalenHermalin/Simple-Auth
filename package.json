@@ -34,7 +34,7 @@
   "scripts": {
     "build": "tsup",
     "lint": "tsc",
-    "prepublishOnly": "bun run build",
+    "prepublishOnly": "npm run build",
     "test": "bun test"
   },
   "keywords": [

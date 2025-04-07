@@ -8,6 +8,9 @@
   "repository": {
     "url": "https://github.com/KalenHermalin/Simple-Auth"
   },
+  "publishConfig": {
+  "@YOUR-USERNAME:registry": "https://npm.pkg.github.com"
+},
   "exports": {
     ".": "./lib/index.ts",
     "./types": "./lib/types.ts",

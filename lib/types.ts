@@ -41,6 +41,6 @@ export class SimpleAuthProviderError extends Error {
         this.name = `SimpleAuthProviderError`;
         this.statusCode = statusCode;
 
-        Error.captureStackTrace(this, this.constructor);
+        Error.captureStackTrace?.(this, this.constructor);
     }
 }

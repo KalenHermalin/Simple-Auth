@@ -15,7 +15,6 @@
     "strictNullChecks": true,
     "isolatedModules": true,
     "noEmit": true,
-    "types": ["node"]
     },
     
     "include": ["lib"],

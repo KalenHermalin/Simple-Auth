@@ -11,4 +11,7 @@ export default defineConfig({
     shims: true,
     skipNodeModulesBundle: true,
     clean: true,
+    esbuildOptions(options) {
+        options.conditions = ['types', 'import', 'require'];
+    }
 });

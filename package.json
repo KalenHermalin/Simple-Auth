@@ -23,7 +23,9 @@
       "require": "./dist/index.js"
     },
     "./types": {
-      "types": "./dist/types.d.ts"
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.mjs",
+      "require": "./dist/types.js"
     },
     "./providers": {
       "types": "./dist/providers/index.d.ts",

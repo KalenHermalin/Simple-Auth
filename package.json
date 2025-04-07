@@ -2,35 +2,52 @@
   "name": "@kalenhermalin/simple-auth",
   "license": "MIT",
   "version": "0.0.1",
+  "description": "A flexible authentication library for various providers",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "repository": {
-    "url": "https://github.com/KalenHermalin/Simple-Auth"
+    "type": "git",
+    "url": "git+https://github.com/KalenHermalin/Simple-Auth.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "publishConfig": {
   "@kalenhermalin:registry": "https://npm.pkg.github.com"
 },
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
     },
     "./types": {
       "types": "./dist/types.d.ts"
     },
     "./providers": {
+      "types": "./dist/providers/index.d.ts",
       "import": "./dist/providers/index.mjs",
-      "require": "./dist/providers/index.js",
-      "types": "./dist/providers/index.d.ts"
+      "require": "./dist/providers/index.js"
     }
   },
   "scripts": {
     "build": "tsup",
-    "lint": "tsc"
+    "lint": "tsc",
+    "prepublishOnly": "bun run build",
+    "test": "bun test"
   },
+  "keywords": [
+    "auth",
+    "oauth",
+    "authentication"
+  ],
+  "author": "Kalen Hermalin",
   "devDependencies": {
+    "@types/node": "^20.11.0",
     "typescript": "^5",
     "tsup": "^8.4.0"
   },

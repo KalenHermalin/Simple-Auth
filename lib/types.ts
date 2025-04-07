@@ -24,7 +24,7 @@ export class SimpleAuthError extends Error {
         this.statusCode = statusCode;
 
         // This maintains proper stack traces in modern JS engines
-        Error.captureStackTrace(this, this.constructor);
+        Error.captureStackTrace?.(this, this.constructor);
     }
 }
 
@@ -41,6 +41,6 @@ export class SimpleAuthProviderError extends Error {
         this.name = `SimpleAuthProviderError`;
         this.statusCode = statusCode;
 
-        Error.captureStackTrace(this, this.constructor);
+        Error.captureStackTrace?.(this, this.constructor);
     }
 }

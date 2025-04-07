@@ -20,18 +20,20 @@ type gitHubProps = {
     name: string,
     clientId: string,
     clientSecret: string,
-    redirectURI?: string;
+    redirectURI: string;
 }
 
-export default class GitHub extends Provider<githubAuthResponse> {
+export default class Google extends Provider<githubAuthResponse> {
 
-    private client: arctic.GitHub;
+    private client: arctic.Google;
     private cName: string;
     private clientId: string;
     private clientSecret: string;
-    private redirectURI: string | null;
-    private scopes: string[] = ["user:email"]
+    private redirectURI: string;
+    private scopes: string[] = ["openid", "profile", "email"]
+    private codeVerifer: string = '';
     constructor(props: gitHubProps) {
+        // TODO: Update Return Typr
         super(props.name, {
             githubID: "string",
             email: "string",
@@ -39,14 +41,16 @@ export default class GitHub extends Provider<githubAuthResponse> {
         this.cName = props.name;
         this.clientId = props.clientId;
         this.clientSecret = props.clientSecret;
-        this.redirectURI = props.redirectURI ? props.redirectURI : null;
-        this.client = new arctic.GitHub(this.clientId, this.clientSecret, this.redirectURI);
+        this.redirectURI = props.redirectURI;
+        this.client = new arctic.Google(this.clientId, this.clientSecret, this.redirectURI);
 
 
     }
     public HandleSignup(): Response {
         const state = generateState();
-        const url: URL = this.client.createAuthorizationURL(state, this.scopes)
+        // TODO: Need to save codeVerifer, need it on callback
+        this.codeVerifer = arctic.generateCodeVerifier()
+        const url: URL = this.client.createAuthorizationURL(state, this.codeVerifer, this.scopes)
         return createAuthRedirect(url, state, this.cName)
     }
     public async HandleCallback(req: Request): Promise<SimpleAuthResponse<githubAuthResponse>> {
@@ -56,6 +60,7 @@ export default class GitHub extends Provider<githubAuthResponse> {
         const oauth_saved_info = extractCookie(req.headers.get("cookie") || "", "simple_oauth_cookie")?.split("+")
         if (!oauth_saved_info)
             throw new SimpleAuthError("Missing authentication session cookie", 400);
+        //console.log(`StoredState: ${storedState}\n State: ${state}\n Code: ${code}`)
         if (code === null)
             throw new SimpleAuthError("Authorization code is missing from callback!", 400)
         if (state === null)
@@ -68,7 +73,7 @@ export default class GitHub extends Provider<githubAuthResponse> {
             throw new SimpleAuthError("State parameter mismatch", 401)
 
         // TODO: catch potential errors
-        const result = await this.client.validateAuthorizationCode(code)
+        const result = await this.client.validateAuthorizationCode(code, this.codeVerifer)
         return {
             provider: this.cName,
             providerData: await this.getuserData(result)
@@ -78,41 +83,11 @@ export default class GitHub extends Provider<githubAuthResponse> {
     }
 
     private async getuserData(validatedResult: arctic.OAuth2Tokens): Promise<githubAuthResponse> {
-        console.log(validatedResult)
-        if (!validatedResult.accessToken)
-            throw new Error("SimpleAuth Error: No access token in response");
-
-        const access_token = validatedResult.accessToken;
-
-        const userResponse = await fetch("https://api.github.com/user", {
-            headers: {
-                "Authorization": `Bearer ${access_token}`,
-                "Accept": "application/vnd.github+json"
-            }
-        })
-        const user = await userResponse.json()
-        if (!user)
-            throw new Error("Could not retreive user data")
-        const userId = user.id;
-
-        const emailResponse = await fetch("https://api.github.com/user/emails", {
-            headers: {
-                Authorization: `Bearer ${access_token}`
-            }
-        });
-        const emails: gitHubEmailResponse[] = await emailResponse.json();
-        if (!emails)
-            throw new Error("Could not retreive user email")
-
-        const primaryEmail = emails.find((email: gitHubEmailResponse) => email.primary === true);
-        if (!primaryEmail)
-            throw new Error("Could not find a primary email associated with this account")
-        if (primaryEmail.verified === false)
-            throw new Error("Primary email must be verified to sign up")
-        return { email: primaryEmail.email, githubID: userId }
+        throw new Error("Not Impletemented Yet...")
     }
 
 }
+
 
 
 

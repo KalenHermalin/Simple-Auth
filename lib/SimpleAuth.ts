@@ -22,7 +22,7 @@ export class SimpleAuth<P extends Record<string, Provider<any>>> {
             // The data returned from the provider, with type information from the provider's returnType.
             providerData: P[K]['returnType'];
         }
-    }[keyof P]) => Response;
+    }[keyof P]) => Promise<Response>;
 
     /**
     * Constructs a new instance of SimpleAuth.
@@ -35,7 +35,7 @@ export class SimpleAuth<P extends Record<string, Provider<any>>> {
             provider: K extends string ? K : never;
             providerData: P[K]['returnType'];
         }
-    }[keyof P]) => Response) {
+    }[keyof P]) => Promise<Response>) {
         this.providers = providers;
         this.onSuccess = onSuccess;
     }
